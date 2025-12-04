@@ -1,4 +1,4 @@
-﻿<Window x:Class="Assets_Editor.DatEditor"
+﻿<local:DatEditorCommon x:Class="Assets_Editor.DatEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,13 +9,13 @@
         mc:Ignorable="d"
         Title="DatEditor" Height="880" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
         Style="{StaticResource MaterialDesignWindow}">
-    <Window.Resources>
+    <local:DatEditorCommon.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
         <local:BooleanOrInverterConverter x:Key="BooleanOrInverterConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-    </Window.Resources>
+    </local:DatEditorCommon.Resources>
     <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch">
         <Grid.IsHitTestVisible>
             <MultiBinding Converter="{StaticResource BooleanOrInverterConverter}">
@@ -841,4 +841,4 @@
             </GroupBox>
         </Grid>
     </Grid>
-</Window>
+</local:DatEditorCommon>

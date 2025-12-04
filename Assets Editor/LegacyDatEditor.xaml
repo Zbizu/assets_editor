@@ -1,4 +1,4 @@
-﻿<Window x:Class="Assets_Editor.LegacyDatEditor"
+﻿<local:DatEditorCommon x:Class="Assets_Editor.LegacyDatEditor"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,11 +9,11 @@
         mc:Ignorable="d"
         Title="LegacyDatEditor" Height="880" Width="1220" materialDesign:ShadowAssist.CacheMode="{x:Null}" Loaded="Window_Loaded"
         Style="{StaticResource MaterialDesignWindow}">
-    <Window.Resources>
+    <local:DatEditorCommon.Resources>
         <local:ArithmeticConverter x:Key="ArithmeticConverter" />
         <local:NullableColorToBrushConverter x:Key="NullableColorToBrushConverter" />
         <local:BooleanInverter x:Key="BooleanInverter"/>
-    </Window.Resources>
+    </local:DatEditorCommon.Resources>
     <Grid x:Name="MainContent" HorizontalAlignment="Center" VerticalAlignment="Stretch" IsHitTestVisible="{Binding ElementName=ComppileDialogHost, Path=IsOpen, Mode=OneWay, Converter={StaticResource BooleanInverter}}">
         <materialDesign:DialogHost Grid.Row="1" x:Name="ComppileDialogHost" OverlayBackground="Gray" >
             <materialDesign:DialogHost.DialogContent>
@@ -590,4 +590,4 @@
             </GroupBox>
         </Grid>
     </Grid>
-</Window>
+</local:DatEditorCommon>

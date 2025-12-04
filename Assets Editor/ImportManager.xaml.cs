@@ -310,44 +310,32 @@ namespace Assets_Editor
                 ObjListViewSelectedIndex.Value = (int)selectedItems.Last().Id;
                 foreach (var item in selectedItems)
                 {
-                    Appearance CurrentObjectAppearance;
+                    var list = _editor.GetAppearanceList();
+                    var things = _editor.GetThingsFromDropdown();
+                    int minVal = ObjectMenu.SelectedIndex == 1 ? 100 : 1;
+
+                    Appearance CurrentObjectAppearance = null;
                     
-                    if (ObjectMenu.SelectedIndex == 0)
-                    {
+                    if (ObjectMenu.SelectedIndex == 0) {
                         CurrentObjectAppearance = ImportAppearances.Outfit.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
-                        CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
-                        MainWindow.appearances.Outfit.Add(CurrentObjectAppearance);
-                        _editor.ThingsOutfit.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
-                    }
-                    else if (ObjectMenu.SelectedIndex == 1)
-                    {
+                    } else if (ObjectMenu.SelectedIndex == 1) {
                         CurrentObjectAppearance = ImportAppearances.Object.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
-                        CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Object.Count + 100;
-                        MainWindow.appearances.Object.Add(CurrentObjectAppearance);
-                        _editor.ThingsItem.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
-                    }
-                    else if (ObjectMenu.SelectedIndex == 2)
-                    {
+                    } else if (ObjectMenu.SelectedIndex == 2) {
                         CurrentObjectAppearance = ImportAppearances.Effect.FirstOrDefault(o => o.Id == item.Id).Clone();
-                        updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
-                        CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Effect.Count + 1;
-                        MainWindow.appearances.Effect.Add(CurrentObjectAppearance);
-                        _editor.ThingsEffect.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
-                    }
-                    else if (ObjectMenu.SelectedIndex == 3)
-                    {
+                    } else if (ObjectMenu.SelectedIndex == 3) {
                         CurrentObjectAppearance = ImportAppearances.Missile.FirstOrDefault(o => o.Id == item.Id).Clone();
+                    }
+
+                    if (CurrentObjectAppearance != null) {
                         updateObjectAppearanceSprite(CurrentObjectAppearance, MainSprStorage);
-                        CurrentObjectAppearance.Id = (uint)MainWindow.appearances.Missile.Count + 1;
-                        MainWindow.appearances.Missile.Add(CurrentObjectAppearance);
-                        _editor.ThingsMissile.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
+                        CurrentObjectAppearance.Id = (uint)(list.Count + minVal);
+                        list.Add(CurrentObjectAppearance);
+                        things.Add(new ShowList() { Id = CurrentObjectAppearance.Id });
                     }
                 }
+
                 _editor.ObjectMenu.SelectedIndex = ObjectMenu.SelectedIndex;
                 _editor.UpdateShowList(ObjectMenu.SelectedIndex);
-
             }
         }
 
@@ -395,11 +383,20 @@ namespace Assets_Editor
                 }
                 ObjectAppearance.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
                 MainWindow.appearances.Outfit.Add(ObjectAppearance);
-                _editor.ThingsOutfit.Add(new ShowList() { Id = ObjectAppearance.Id });
+                _editor.GetThingsByType(APPEARANCE_TYPE.AppearanceOutfit).Add(new ShowList() { Id = ObjectAppearance.Id });
                 _editor.ObjectMenu.SelectedIndex = 0;
                 _editor.UpdateShowList(0);
-
             }
+        }
+
+        private int AppearanceTypeToIndex(APPEARANCE_TYPE a) {
+            return a switch {
+                APPEARANCE_TYPE.AppearanceOutfit => 0,
+                APPEARANCE_TYPE.AppearanceObject => 1,
+                APPEARANCE_TYPE.AppearanceEffect => 2,
+                APPEARANCE_TYPE.AppearanceMissile => 3,
+                _ => -1
+            };
         }
 
         private void ImportObject_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -408,57 +405,42 @@ namespace Assets_Editor
                 Filter = "OBD Files (*.obd)|*.obd",
                 ClientGuid = Globals.GUID_ImportManager2
             };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                string selectedFilePath = openFileDialog.FileName;
-                ConcurrentDictionary<int, MemoryStream> objectSprList = [];
-                Appearance appearance = ObdDecoder.Load(selectedFilePath, ref objectSprList);
-                if (appearance != null)
-                {
-                    OBDImage.Source = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, objectSprList));
-                    if (ObjImportSlider.Value == 1)
-                    {
-                        if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceOutfit)
-                        {
-                            updateObjectAppearanceSprite(appearance, objectSprList);
-                            appearance.Id = (uint)MainWindow.appearances.Outfit.Count + 1;
-                            MainWindow.appearances.Outfit.Add(appearance);
-                            _editor.ThingsOutfit.Add(new ShowList() { Id = appearance.Id });
-                            _editor.ObjectMenu.SelectedIndex = 0;
-                            _editor.UpdateShowList(0);
-                        }
-                        else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceObject)
-                        {
-                            updateObjectAppearanceSprite(appearance, objectSprList);
-                            appearance.Id = (uint)MainWindow.appearances.Object.Count + 100;
-                            MainWindow.appearances.Object.Add(appearance);
-                            _editor.ThingsItem.Add(new ShowList() { Id = appearance.Id });
-                            _editor.ObjectMenu.SelectedIndex = 1;
-                            _editor.UpdateShowList(1);
-                        }
-                        else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceEffect)
-                        {
-                            updateObjectAppearanceSprite(appearance, objectSprList);
-                            appearance.Id = (uint)MainWindow.appearances.Effect.Count + 1;
-                            MainWindow.appearances.Effect.Add(appearance);
-                            _editor.ThingsEffect.Add(new ShowList() { Id = appearance.Id });
-                            _editor.ObjectMenu.SelectedIndex = 2;
-                            _editor.UpdateShowList(2);
-                        }
-                        else if (appearance.AppearanceType == APPEARANCE_TYPE.AppearanceMissile)
-                        {
-                            updateObjectAppearanceSprite(appearance, objectSprList);
-                            appearance.Id = (uint)MainWindow.appearances.Missile.Count + 1;
-                            MainWindow.appearances.Missile.Add(appearance);
-                            _editor.ThingsMissile.Add(new ShowList() { Id = appearance.Id });
-                            _editor.ObjectMenu.SelectedIndex = 3;
-                            _editor.UpdateShowList(3);
-                        }
-                    }
-                }
 
+            if (openFileDialog.ShowDialog() != true) {
+                return;
             }
+
+            string selectedFilePath = openFileDialog.FileName;
+            ConcurrentDictionary<int, MemoryStream> objectSprList = [];
+            Appearance appearance = ObdDecoder.Load(selectedFilePath, ref objectSprList);
+            if (appearance == null) {
+                return;
+            }
+
+            OBDImage.Source = Utils.BitmapToBitmapImage(LegacyAppearance.GetObjectImage(appearance, objectSprList));
+            if (ObjImportSlider.Value != 1) {
+                return;
+            }
+            
+            var things = _editor.GetThingsByType(appearance.AppearanceType);
+            int newIndex = AppearanceTypeToIndex(appearance.AppearanceType);
+            var list = _editor.GetAppearanceListByType(newIndex);
+            if (things == null || list == null) {
+                return;
+            }
+
+            int minVal = appearance.AppearanceType == APPEARANCE_TYPE.AppearanceObject ? 100 : 1;
+
+            updateObjectAppearanceSprite(appearance, objectSprList);
+
+            appearance.Id = (uint)(list.Count + minVal);
+            MainWindow.appearances.Outfit.Add(appearance);
+            things.Add(new ShowList() { Id = appearance.Id });
+
+            _editor.ObjectMenu.SelectedIndex = newIndex;
+            _editor.UpdateShowList(newIndex);
         }
+
         private void ObjListView_Drag(object sender, MouseEventArgs e)
         {
             
